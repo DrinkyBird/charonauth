@@ -20,7 +20,7 @@
 /* jshint node: true */
 "use strict";
 
-var options = require('commander');
+var { program } = require('commander');
 var fs = require('fs');
 var ini = require('ini');
 
@@ -33,11 +33,14 @@ var pack = JSON.parse(fs.readFileSync(__dirname + '/../package.json', {
 }));
 
 // Parse command line options.
-options
+program
 	.version(pack.version)
 	.option('-c, --config <path>', 'path to config file (default charonauth.ini)', 'charonauth.ini')
-	.option('-v, --verbose', 'verbose logging')
-	.parse(process.argv);
+	.option('-v, --verbose', 'verbose logging');
+	
+program.parse();
+
+const options = program.opts();
 
 // Load the configuration file into a Config.
 var config;

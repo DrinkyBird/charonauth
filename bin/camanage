@@ -23,7 +23,7 @@
 var Promise = require('bluebird');
 
 var crypto = Promise.promisifyAll(require('crypto'));
-var program = require('commander');
+var { program } = require('commander');
 var fs = Promise.promisifyAll(require('fs'));
 var ini = require('ini');
 var validator = require('validator');
@@ -38,7 +38,7 @@ var pack = JSON.parse(fs.readFileSync(__dirname + '/../package.json', {
 	'encoding': 'utf8'
 }));
 
-// Parse command line options.
+// Parse command line program.opts().
 program
 	.version(pack.version)
 	.option('-c, --config <path>', 'path to config file (default charonauth.ini)', 'charonauth.ini');
@@ -56,7 +56,8 @@ program
 	.description('Give a user a new random password')
 	.action(userpass);
 
-program.parse(process.argv);
+program.parse();
+
 if (program.args.length === 0) {
 	program.help();
 }
@@ -68,7 +69,7 @@ function fatalError(message) {
 
 // User password subcommand
 function userpass(user) {
-	fs.readFileAsync(program.config, {'encoding': 'utf8'}).then(function(file) {
+	fs.readFileAsync(program.opts().config, {'encoding': 'utf8'}).then(function(file) {
 		return new Config(ini.parse(file));
 	}).then(function(config) {
 		return new DBConn(config.get('database'));
@@ -95,7 +96,7 @@ function userlevel(user, level) {
 		if (!access.validLevel(level)) {
 			reject(new Error("\"" + level + "\" is not a valid level"));
 		} else {
-			resolve(fs.readFileAsync(program.config, {'encoding': 'utf8'}));
+			resolve(fs.readFileAsync(program.opts().config, {'encoding': 'utf8'}));
 		}
 	}).then(function(file) {
 		return new Config(ini.parse(file));
@@ -121,7 +122,7 @@ function mailtest(recipient) {
 		if (!validator.isEmail(recipient)) {
 			reject(new Error("\"" + recipient + "\" is not a valid email address"));
 		} else {
-			resolve(fs.readFileAsync(program.config, {'encoding': 'utf8'}));
+			resolve(fs.readFileAsync(program.opts().config, {'encoding': 'utf8'}));
 		}
 	}).then(function(file) {
 		return new Config(ini.parse(file));
