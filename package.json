@@ -12,7 +12,7 @@
     "charonauth": "./bin/charonauth"
   },
   "dependencies": {
-    "bignum": "^0.11.0",
+    "bignum": "^0.13.1",
     "bluebird": "~2.3.4",
     "body-parser": "~1.9.0",
     "commander": "~2.3.0",
