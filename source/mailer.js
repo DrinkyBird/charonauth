@@ -77,10 +77,13 @@ function Mailer(config, logger) {
 				host: this.config.get('smtp.host'),
 				port: this.config.get('smtp.port'),
 				secure: this.config.getBool('smtp.secure'),
+				requireTLS: this.config.getBool('smtp.requiretls'),
 				auth: {
 					user: this.config.get('smtp.user'),
 					pass: this.config.get('smtp.pass')
-				}
+				},
+				authMethod: this.config.get('smtp.authmethod') || "PLAIN",
+				name: this.config.get('smtp.name')
 			}));
 		} else if (!transport) {
 			throw new Error('Missing transport in mailer configuration.');
