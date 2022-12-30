@@ -30,7 +30,7 @@
     "nodemailer-sendmail-transport": "~1.0.0",
     "nodemailer-smtp-transport": "^2.7.4",
     "nodemailer-stub-transport": "^1.0.0",
-    "nunjucks": "^2.3.0",
+    "nunjucks": "^3.2.3",
     "nunjucks-date": "^1.2.0",
     "request": "^2.69.0",
     "sequelize": "^3.19.2",
