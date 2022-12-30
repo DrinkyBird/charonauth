@@ -20,7 +20,6 @@
 "use strict";
 
 var buffer = require("buffer");
-var buffertools = require("buffertools");
 var util = require("util");
 
 // Protocol Constants
@@ -43,7 +42,7 @@ function readString(buf, offset, encoding) {
 		encoding = 'utf8';
 	}
 
-	var z = buffertools.indexOf(buf, "\0", offset);
+	var z = buf.indexOf("\0", offset, encoding);
 	if (z === -1) {
 		throw new TypeError("Null-terminator not found in buffer");
 	}
