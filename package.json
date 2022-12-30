@@ -34,8 +34,9 @@
     "nunjucks-date": "^1.2.0",
     "request": "^2.69.0",
     "sequelize": "^3.19.2",
+    "sqlite3": "^5.1.4",
     "validator": "^3.43.0",
-    "winston": "~0.8.0",
+    "winston": "^3.8.2",
     "world-countries": "^1.7.7"
   },
   "devDependencies": {

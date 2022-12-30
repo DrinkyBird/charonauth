@@ -29,30 +29,30 @@ function Logger(config) {
 		verbose: false
 	});
 
-	this.logger = new (winston.Logger)({
+	this.logger = winston.createLogger({
 		transports: [
-			new (winston.transports.Console)({
-				colorize: true,
+			new winston.transports.Console({
+				format: winston.format.combine(winston.format.colorize(), winston.format.simple()),
 				level: this.config.getBool('verbose') ? 'verbose' : 'info'
 			})
 		]
 	});
 
 	this.log = this.logger.log;
-	this.verbose = this.logger.verbose;
-	this.info = this.logger.info;
-	this.warn = this.logger.warn;
-	this.error = this.logger.error;
+	this.verbose = (s) => { this.logger.log("verbose", s); };
+	this.info = (s) => { this.logger.log("info", s); };
+	this.warn = (s) => { this.logger.log("warn", s); };
+	this.error = (s) => { this.logger.log("error", s); };
 
 	// Log to a file if supplied
 	if (this.config.get('file')) {
-		this.logger.add(winston.transports.File, {
+		this.logger.add(new winston.transports.File({
 			filename: this.config.get('file'),
 			json: false,
 			timestamp: function() {
 				return new Date().toISOString() + ' [' + process.pid + ']';
 			}
-		});
+		}));
 	}
 }
 
