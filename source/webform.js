@@ -29,14 +29,20 @@ var access = require('./access');
 var countries = require('./countries');
 var error = require('./error');
 
+// [SB] Compatibility function...
+// Fun fact: validator.isNull actually only checked if str.length === 0.
+function validator_isNull(str) {
+	return _.isNull(str) || str.length === 0;
+}
+
 module.exports.loginForm = function(dbconn, data) {
 	return new Promise(function(resolve, reject) {
 		var errors = {};
 
-		if (!("login" in data) || validator.isNull(data.login)) {
+		if (!("login" in data) || validator_isNull(data.login)) {
 			errors.login = "Login is required";
 		}
-		if (!("password" in data) || validator.isNull(data.password)) {
+		if (!("password" in data) || validator_isNull(data.password)) {
 			errors.password = "Password is required";
 		}
 
@@ -59,7 +65,7 @@ module.exports.registerForm = function(dbconn, recaptcha, data, ip) {
 		var errors = {};
 
 		// Validate Username
-		if (!("username" in data) || validator.isNull(data.username)) {
+		if (!("username" in data) || validator_isNull(data.username)) {
 			errors.username = "Username is required";
 		} else if (!validator.isLength(data.username, 2, 12)) {
 			errors.username = "Username must be between 2 and 12 characters";
@@ -76,7 +82,7 @@ module.exports.registerForm = function(dbconn, recaptcha, data, ip) {
 		}
 
 		// Validate Password
-		if (!("password" in data) || validator.isNull(data.password)) {
+		if (!("password" in data) || validator_isNull(data.password)) {
 			errors.password = "Password is required";
 		} else if (!validator.isLength(data.password, 8, 1000)) {
 			errors.password = "Password must be between 8 and 1,000 characters";
@@ -87,14 +93,14 @@ module.exports.registerForm = function(dbconn, recaptcha, data, ip) {
 		}
 
 		// Validate password confirmation
-		if (!("confirm" in data) || validator.isNull(data.confirm)) {
+		if (!("confirm" in data) || validator_isNull(data.confirm)) {
 			errors.confirm = "Password Confirmation is required";
 		} else if (data.password !== data.confirm) {
 			errors.confirm = "Password Confirmation does not match";
 		}
 
 		// Validate E-Mail address
-		if (!("email" in data) || validator.isNull(data.email)) {
+		if (!("email" in data) || validator_isNull(data.email)) {
 			errors.email = "E-Mail is required";
 		} else if (!validator.isEmail(data.email)) {
 			errors.email = "E-Mail must be valid";
@@ -110,8 +116,8 @@ module.exports.registerForm = function(dbconn, recaptcha, data, ip) {
 
 		// Validate ReCAPTCHA if we've got a private key for it
 		if (recaptcha) {
-			if (!("recaptcha_challenge_field" in data) || validator.isNull(data.recaptcha_challenge_field) ||
-					!("recaptcha_response_field" in data) || validator.isNull(data.recaptcha_response_field)) {
+			if (!("recaptcha_challenge_field" in data) || validator_isNull(data.recaptcha_challenge_field) ||
+					!("recaptcha_response_field" in data) || validator_isNull(data.recaptcha_response_field)) {
 				errors.captcha = "CAPTCHA is required";
 			} else {
 				promises.push(new Promise(function (resolve, reject) {
@@ -161,9 +167,9 @@ module.exports.userForm = function(dbconn, data, username) {
 		var errors = {};
 
 		// Validate current password
-		if (!("current_password" in data) || validator.isNull(data.current_password)) {
+		if (!("current_password" in data) || validator_isNull(data.current_password)) {
 			errors.current_password = "Current Password is required";
-		} else if (validator.isNull(username)) {
+		} else if (validator_isNull(username)) {
 			errors.current_password = "Current Password is missing session data";
 		} else {
 			promises.push(new Promise(function(resolve, reject) {
@@ -179,7 +185,7 @@ module.exports.userForm = function(dbconn, data, username) {
 
 
 		// Validate password, if set
-		if ("password" in data && !validator.isNull(data.password)) {
+		if ("password" in data && !validator_isNull(data.password)) {
 			if (!validator.isAscii(data.password)) {
 				errors.password = "Password must be plain ASCII characters";
 			} else if (!validator.isLength(data.password, 8, 1000)) {
@@ -188,14 +194,14 @@ module.exports.userForm = function(dbconn, data, username) {
 				errors.password = "Password must contain more than just letters or just numbers, unless your password is more than 20 characters";
 			}
 
-			if (!("confirm" in data) || validator.isNull(data.confirm)) {
+			if (!("confirm" in data) || validator_isNull(data.confirm)) {
 				errors.confirm = "Password Confirmation is required";
 			}
 		}
 
 		// Validate password confirmation, if set
-		if ("confirm" in data && !validator.isNull(data.confirm)) {
-			if (!("password" in data) || validator.isNull(data.password)) {
+		if ("confirm" in data && !validator_isNull(data.confirm)) {
+			if (!("password" in data) || validator_isNull(data.password)) {
 				errors.password = "Password is required";
 			}
 
@@ -205,7 +211,7 @@ module.exports.userForm = function(dbconn, data, username) {
 		}
 
 		// Validate E-Mail address, if set
-		if ("email" in data && !validator.isNull(data.email)) {
+		if ("email" in data && !validator_isNull(data.email)) {
 			if (!validator.isEmail(data.email)) {
 				errors.email = "E-Mail must be valid";
 			} else {
@@ -242,7 +248,7 @@ module.exports.userAdminForm = function(dbconn, data, username, email, userAcces
 		var errors = {};
 
 		// Validate Username
-		if (!("username" in data) || validator.isNull(data.username)) {
+		if (!("username" in data) || validator_isNull(data.username)) {
 			errors.username = "Username is required";
 		} else if (!validator.isLength(data.username, 2, 12)) {
 			errors.username = "Username must be between 2 and 12 characters";
@@ -261,7 +267,7 @@ module.exports.userAdminForm = function(dbconn, data, username, email, userAcces
 		}
 
 		// Validate password, if set
-		if ("password" in data && !validator.isNull(data.password)) {
+		if ("password" in data && !validator_isNull(data.password)) {
 			if (!validator.isAscii(data.password)) {
 				errors.password = "Password must be plain ASCII characters";
 			} else if (!validator.isLength(data.password, 8, 1000)) {
@@ -274,7 +280,7 @@ module.exports.userAdminForm = function(dbconn, data, username, email, userAcces
 		}
 
 		// Validate E-Mail address
-		if (!("email" in data) || validator.isNull(data.email)) {
+		if (!("email" in data) || validator_isNull(data.email)) {
 			errors.email = "E-Mail is required";
 		} else if (!validator.isEmail(data.email)) {
 			errors.email = "E-Mail must be valid";
@@ -291,7 +297,7 @@ module.exports.userAdminForm = function(dbconn, data, username, email, userAcces
 		}
 
 		// Validate access level change
-		if (!("access" in data) || validator.isNull(data.access)) {
+		if (!("access" in data) || validator_isNull(data.access)) {
 			errors.access = "Access is required";
 		} else if (!validator.isIn(data.access, access.validLevelSet(userAccess, targetAccess))) {
 			errors.access = "Access must be valid selection";
@@ -344,7 +350,7 @@ module.exports.profileForm = function(dbconn, data, username) {
 
 		if (!("country" in data)) {
 			errors.country = "Country is required";
-		} else if (!validator.isNull(data.country) && !countries.isCountryCode(data.country)) {
+		} else if (!validator_isNull(data.country) && !countries.isCountryCode(data.country)) {
 			errors.country = "Country must be valid selection";
 		}
 
@@ -385,7 +391,7 @@ module.exports.resetForm = function(data) {
 		var errors = {};
 
 		// Validate E-Mail address
-		if (!("email" in data) || validator.isNull(data.email)) {
+		if (!("email" in data) || validator_isNull(data.email)) {
 			errors.email = "E-Mail is required";
 		} else if (!validator.isEmail(data.email)) {
 			errors.email = "E-Mail must be valid";
@@ -404,7 +410,7 @@ module.exports.resetTokenForm = function(data) {
 		var errors = {};
 
 		// Validate Password
-		if (!("password" in data) || validator.isNull(data.password)) {
+		if (!("password" in data) || validator_isNull(data.password)) {
 			errors.password = "Password is required";
 		} else if (!validator.isLength(data.password, 8, 1000)) {
 			errors.password = "Password must be between 8 and 1,000 characters";
@@ -415,7 +421,7 @@ module.exports.resetTokenForm = function(data) {
 		}
 
 		// Validate password confirmation
-		if (!("confirm" in data) || validator.isNull(data.confirm)) {
+		if (!("confirm" in data) || validator_isNull(data.confirm)) {
 			errors.confirm = "Password Confirmation is required";
 		} else if (data.password !== data.confirm) {
 			errors.confirm = "Password Confirmation does not match";
