@@ -31,7 +31,6 @@ var express = require('express');
 var session = require('express-session');
 var fsSession = require('fs-session')({ session: session });
 var ipaddr = require('ipaddr.js');
-var uuid = require('node-uuid');
 var nunjucks = require('nunjucks');
 var nunjucksDate = require('nunjucks-date');
 var querystring = require('querystring');

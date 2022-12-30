@@ -25,7 +25,7 @@ var _ = require('lodash');
 var crypto = require('crypto');
 require('date-utils');
 var Sequelize = require('sequelize');
-var uuid = require('node-uuid');
+const { v4: uuidv4 } = require('uuid');
 
 var Config = require('./config');
 var countries = require('./countries');
@@ -326,7 +326,7 @@ DBConn.prototype.newVerify = function(user) {
 		}
 	})).spread(function(verify, created) {
 		return verify.update({
-			token: uuid.v4()
+			token: uuidv4()
 		});
 	});
 };
@@ -358,7 +358,7 @@ DBConn.prototype.newReset = function(user) {
 		}
 	})).spread(function(reset, _) {
 		return reset.update({
-			token: uuid.v4()
+			token: uuidv4()
 		});
 	});
 };
