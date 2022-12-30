@@ -59,7 +59,7 @@ function writeString(buf, str, offset, encoding) {
 		encoding = 'utf8';
 	}
 
-	var string = new Buffer(str, encoding);
+	var string = Buffer.from(str, encoding);
 	string.copy(buf, offset);
 	buf.writeUInt8(0, offset + string.length);
 }
@@ -72,7 +72,7 @@ function writeString(buf, str, offset, encoding) {
 // Username, String
 var serverNegotiate = {
 	marshall: function(data) {
-		var buf = new Buffer(9 + Buffer.byteLength(data.username, 'ascii') + 1);
+		var buf = Buffer.alloc(9 + Buffer.byteLength(data.username, 'ascii') + 1);
 
 		buf.writeUInt32LE(SERVER_NEGOTIATE, 0);
 		buf.writeUInt8(data.version, 4);
@@ -112,7 +112,7 @@ var serverNegotiate = {
 // Username, String
 var authNegotiate = {
 	marshall: function(data) {
-		var buf = new Buffer(14 + data.salt.length + Buffer.byteLength(data.username, 'ascii') + 1);
+		var buf = Buffer.alloc(14 + data.salt.length + Buffer.byteLength(data.username, 'ascii') + 1);
 
 		buf.writeUInt32LE(AUTH_NEGOTIATE, 0);
 		buf.writeUInt8(1, 4);
@@ -134,7 +134,7 @@ var authNegotiate = {
 
 		// Salt
 		var salt_len = buf.readUInt8(13);
-		var salt = new Buffer(salt_len);
+		var salt = Buffer.alloc(salt_len);
 		buf.copy(salt, 0, 14, 14 + salt_len);
 
 		var data = {
@@ -152,7 +152,7 @@ var authNegotiate = {
 // UInt32, UInt16, Buffer
 var serverEphemeral = {
 	marshall: function(data) {
-		var buf = new Buffer(10 + data.ephemeral.length);
+		var buf = Buffer.alloc(10 + data.ephemeral.length);
 
 		buf.writeUInt32LE(SERVER_EPHEMERAL, 0);
 		buf.writeUInt32LE(data.session, 4);
@@ -167,7 +167,7 @@ var serverEphemeral = {
 		}
 
 		var ephemeralLength = buf.readUInt16LE(8);
-		var ephemeral = new Buffer(ephemeralLength);
+		var ephemeral = Buffer.alloc(ephemeralLength);
 		buf.copy(ephemeral, 0, 10, 10 + ephemeralLength);
 
 		return {
@@ -181,7 +181,7 @@ var serverEphemeral = {
 // UInt32, UInt16, Buffer
 var authEphemeral = {
 	marshall: function(data) {
-		var buf = new Buffer(10 + data.ephemeral.length);
+		var buf = Buffer.alloc(10 + data.ephemeral.length);
 
 		buf.writeUInt32LE(AUTH_EPHEMERAL, 0);
 		buf.writeUInt32LE(data.session, 4);
@@ -196,7 +196,7 @@ var authEphemeral = {
 		}
 
 		var ephemeralLength = buf.readUInt16LE(8);
-		var ephemeral = new Buffer(ephemeralLength);
+		var ephemeral = Buffer.alloc(ephemeralLength);
 		buf.copy(ephemeral, 0, 10, 10 + ephemeralLength);
 
 		return {
@@ -210,7 +210,7 @@ var authEphemeral = {
 // UInt32, UInt16, Buffer
 var serverProof = {
 	marshall: function(data) {
-		var buf = new Buffer(10 + data.proof.length);
+		var buf = Buffer.alloc(10 + data.proof.length);
 
 		buf.writeUInt32LE(SERVER_PROOF, 0);
 		buf.writeUInt32LE(data.session, 4);
@@ -225,7 +225,7 @@ var serverProof = {
 		}
 
 		var proofLength = buf.readUInt16LE(8);
-		var proof = new Buffer(proofLength);
+		var proof = Buffer.alloc(proofLength);
 		buf.copy(proof, 0, 10, 10 + proofLength);
 
 		return {
@@ -239,7 +239,7 @@ var serverProof = {
 // UInt32, UInt16, Buffer
 var authProof = {
 	marshall: function(data) {
-		var buf = new Buffer(10 + data.proof.length);
+		var buf = Buffer.alloc(10 + data.proof.length);
 
 		buf.writeUInt32LE(AUTH_PROOF, 0);
 		buf.writeUInt32LE(data.session, 4);
@@ -254,7 +254,7 @@ var authProof = {
 		}
 
 		var proofLength = buf.readInt16LE(8);
-		var proof = new Buffer(proofLength);
+		var proof = Buffer.alloc(proofLength);
 		buf.copy(proof, 0, 10, 10 + proofLength);
 
 		return {
@@ -267,7 +267,7 @@ var authProof = {
 // Errors
 var userError = {
 	marshall: function(data) {
-		var buf = new Buffer(5 + Buffer.byteLength(data.username, 'ascii') + 1);
+		var buf = Buffer.alloc(5 + Buffer.byteLength(data.username, 'ascii') + 1);
 
 		buf.writeUInt32LE(ERROR_USER, 0);
 		buf.writeUInt8(data.error, 4);
@@ -289,7 +289,7 @@ var userError = {
 
 var clientSessionError = {
 	marshall: function(data) {
-		var buf = new Buffer(9);
+		var buf = Buffer.alloc(9);
 
 		buf.writeUInt32LE(ERROR_CLIENTSESSION, 0);
 		buf.writeUInt8(data.error, 4);
@@ -311,7 +311,7 @@ var clientSessionError = {
 
 var sessionError = {
 	marshall: function(data) {
-		var buf = new Buffer(9);
+		var buf = Buffer.alloc(9);
 
 		buf.writeUInt32LE(ERROR_SESSION, 0);
 		buf.writeUInt8(data.error, 4);

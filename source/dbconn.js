@@ -100,8 +100,8 @@ var DBConn = function(config) {
 				},
 				// Set a password on an existing account
 				setPassword: function(password) {
-					var usernameBuffer = new Buffer(this.username.toLowerCase(), 'ascii');
-					var passwordBuffer = new Buffer(password, 'ascii');
+					var usernameBuffer = Buffer.from(this.username.toLowerCase(), 'ascii');
+					var passwordBuffer = Buffer.from(password, 'ascii');
 
 					var params = srp.params['2048'];
 					this.salt = crypto.randomBytes(4);
@@ -206,8 +206,8 @@ var DBConn = function(config) {
 DBConn.prototype.addUser = function(username, password, email, access) {
 	var self = this;
 
-	var usernameBuffer = new Buffer(username.toLowerCase(), 'ascii');
-	var passwordBuffer = new Buffer(password, 'ascii');
+	var usernameBuffer = Buffer.from(username.toLowerCase(), 'ascii');
+	var passwordBuffer = Buffer.from(password, 'ascii');
 
 	var params = srp.params['2048'];
 	var salt = crypto.randomBytes(4);
@@ -249,7 +249,7 @@ DBConn.prototype.findUser = function(username) {
 // Attempts to verify a user in when the password is delivered directly to
 // the application (i.e. through a web login form).
 DBConn.prototype.verifyUser = function(identity, password) {
-	var passwordBuffer = new Buffer(password, 'ascii');
+	var passwordBuffer = Buffer.from(password, 'ascii');
 
 	return this.User.find({
 		where: Sequelize.or(
@@ -262,7 +262,7 @@ DBConn.prototype.verifyUser = function(identity, password) {
 		} else {
 			var params = srp.params['2048'];
 
-			var usernameBuffer = new Buffer(data.username.toLowerCase(), 'ascii');
+			var usernameBuffer = Buffer.from(data.username.toLowerCase(), 'ascii');
 			var verifier = srp.computeVerifier(params, data.salt, usernameBuffer, passwordBuffer);
 
 			if (verifier.toString('hex') !== data.verifier.toString('hex')) {

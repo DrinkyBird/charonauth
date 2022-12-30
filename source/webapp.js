@@ -272,7 +272,7 @@ WebApp.prototype.postLogin = function(req, res, next) {
 			UserId: user.id,
 			WhomId: user.id,
 			type: 'login',
-			ip: new Buffer(ipaddr.parse(req.ip).toByteArray())
+			ip: Buffer.from(ipaddr.parse(req.ip).toByteArray())
 		})]);
 	}).spread(function(user) {
 		return Promise.all([user, user.getProfile()]);

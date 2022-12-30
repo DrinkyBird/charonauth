@@ -216,7 +216,7 @@ AuthApp.prototype.serverEphemeral = function(msg, rinfo) {
 		var srpServer = new srp.Server(
 			srp.params['2048'],
 			user.salt,
-			new Buffer(user.username, 'ascii'),
+			Buffer.from(user.username, 'ascii'),
 			user.verifier,
 			secret
 		);
@@ -277,7 +277,7 @@ AuthApp.prototype.serverProof = function(msg, rinfo) {
 		var srpServer = new srp.Server(
 			srp.params['2048'],
 			user.salt,
-			new Buffer(user.username, 'ascii'),
+			Buffer.from(user.username, 'ascii'),
 			user.verifier,
 			session.secret
 		);
@@ -311,7 +311,7 @@ AuthApp.prototype.serverProof = function(msg, rinfo) {
 			UserId: user.id,
 			WhomId: user.id,
 			type: 'auth',
-			ip: new Buffer(ipaddr.parse(rinfo.address).toByteArray())
+			ip: Buffer.from(ipaddr.parse(rinfo.address).toByteArray())
 		})]);
 	}).spread(function(proof) {
 		// Write the response packet
