@@ -279,7 +279,7 @@ DBConn.prototype.newSession = function(username) {
 	});
 };
 DBConn.prototype.findSession = function(session, timeout) {
-	return Promise.resolve(this.Session.findAll({ where: { session: session }}))
+	return Promise.resolve(this.Session.findOne({ where: { "session": session }}))
 	.then(function(sess) {
 		if (sess === null) {
 			throw new error.SessionNotFound("Session not found", session);
@@ -305,7 +305,8 @@ DBConn.prototype.findSession = function(session, timeout) {
 };
 DBConn.prototype.setEphemeral = function(session, ephemeral, secret, callback) {
 	return this.Session.findOne({
-		where: ['session = ? AND ephemeral IS NULL AND secret IS NULL', session]
+		replacements: [ session ],
+		where: Sequelize.literal('session = ? AND ephemeral IS NULL AND secret IS NULL')
 	}).then(function(sess) {
 		if (sess === null) {
 			throw new Error("Session not found");
