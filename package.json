@@ -33,7 +33,7 @@
     "nunjucks": "^3.2.3",
     "nunjucks-date": "^1.2.0",
     "request": "^2.69.0",
-    "sequelize": "^3.19.2",
+    "sequelize": "^6.28.0",
     "sqlite3": "^5.1.4",
     "validator": "^13.7.0",
     "winston": "^3.8.2",

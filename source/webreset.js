@@ -53,7 +53,7 @@ WebReset.prototype.postReset = function(req, res, next) {
 	var self = this;
 
 	webform.resetForm(req.body).then(function() {
-		return self.dbconn.User.find({
+		return self.dbconn.User.findOne({
 			where: {email: req.body.email},
 			include: [self.dbconn.Profile]
 		});

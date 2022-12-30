@@ -119,7 +119,7 @@ WebRegister.prototype.registerVerify = function(req, res, next) {
 		return Promise.all([verify, verify.getUser()]);
 	}).spread(function(verify, user) {
 		// Enable the user
-		return Promise.all([verify, user.updateAttributes({
+		return Promise.all([verify, user.update({
 			active: true,
 			access: 'USER'
 		})]);

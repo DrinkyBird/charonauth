@@ -117,10 +117,10 @@ WebUsers.prototype.getUsers = function(req, res, next) {
 WebUsers.prototype.getUser = function(req, res, next) {
 	var self = this;
 
-	this.dbconn.User.findOne({
+	Promise.resolve(this.dbconn.User.findOne({
 		where: {username: req.params.id.toLowerCase()},
 		include: [this.dbconn.Profile]
-	}).then(function(user) {
+	})).then(function(user) {
 		if (_.isNull(user)) {
 			throw new error.NotFound('User not found');
 		}
@@ -139,9 +139,9 @@ WebUsers.prototype.getUser = function(req, res, next) {
 		}
 
 		// Find the latest authentication
-		return Promise.all([user, self.dbconn.Action.find({
+		return Promise.all([user, self.dbconn.Action.findAll({
 			where: {UserId: user.id, type: 'auth'},
-			order: 'createdAt DESC'
+			order: [['createdAt', 'DESC']]
 		})]);
 	}).spread(function(user, action) {
 		// We may not be able to see the latest authentication.
@@ -161,7 +161,7 @@ WebUsers.prototype.getUser = function(req, res, next) {
 
 // Govern access to the user modification pages.
 WebUsers.prototype.editUserAccess = function(req, res, next) {
-	this.dbconn.User.find({
+	this.dbconn.User.findOne({
 		where: {username: req.params.id.toLowerCase()}
 	}).then(function(user) {
 		if (_.isNull(user)) {
@@ -183,7 +183,7 @@ WebUsers.prototype.editUserAccess = function(req, res, next) {
 
 // Govern access to the user action pages.
 WebUsers.prototype.userActionsAccess = function(req, res, next) {
-	this.dbconn.User.find({
+	this.dbconn.User.findOne({
 		where: {username: req.params.id.toLowerCase()}
 	}).then(function(user) {
 		if (_.isNull(user)) {
@@ -238,7 +238,7 @@ WebUsers.prototype.editUser = function(req, res, next) {
 WebUsers.prototype.editUserPost = function(req, res, next) {
 	var self = this;
 
-	this.dbconn.User.find({
+	this.dbconn.User.findOne({
 		where: {username: req.params.id.toLowerCase()},
 		include: [this.dbconn.Profile]
 	}).then(function(user) {
@@ -246,7 +246,7 @@ WebUsers.prototype.editUserPost = function(req, res, next) {
 		return webform.profileForm(self.dbconn, req.body.profile, user.username)
 		.then(function() {
 			// Persist all profile data
-			user.Profile.updateAttributes({
+			user.Profile.update({
 				visible: "visible" in req.body.profile ? true : false,
 				visible_lastseen: "visible_lastseen" in req.body.profile ? true : false,
 				gravatar: _.isEmpty(req.body.profile.gravatar) ? null : req.body.profile.gravatar,
@@ -313,7 +313,7 @@ function renderEditSettings(req, res, options) {
 
 // Edit a user's settings
 WebUsers.prototype.editSettings = function(req, res, next) {
-	this.dbconn.User.find({
+	this.dbconn.User.findOne({
 		where: {username: req.params.id.toLowerCase()},
 		include: [this.dbconn.Profile]
 	}).then(function(user) {
@@ -341,7 +341,7 @@ WebUsers.prototype.editSettings = function(req, res, next) {
 WebUsers.prototype.editSettingsPost = function(req, res, next) {
 	var self = this;
 
-	this.dbconn.User.find({
+	this.dbconn.User.findOne({
 		where: {username: req.params.id.toLowerCase()},
 		include: [this.dbconn.Profile]
 	}).then(function(user) {
@@ -350,7 +350,7 @@ WebUsers.prototype.editSettingsPost = function(req, res, next) {
 			return webform.userAdminForm(self.dbconn, req.body.user, user.username, user.email, req.session.user.access, user.access)
 			.then(function() {
 				// Persist almost all of settings
-				user.updateAttributes({
+				user.update({
 					active: "active" in req.body.user ? true : false,
 					username: req.body.user.username.toLowerCase(),
 					email: req.body.user.email,
@@ -440,7 +440,7 @@ WebUsers.prototype.getActions = function(req, res, next) {
 	var username = req.params.id.toLowerCase();
 	var qinfo = paginator.qinfo(req);
 
-	this.dbconn.User.find({
+	this.dbconn.User.findOne({
 		where: {username: username},
 	}).then(function(user) {
 		// Tab permissions
@@ -475,7 +475,7 @@ WebUsers.prototype.getAction = function(req, res, next) {
 	var username = req.params.id.toLowerCase();
 	var actionID = req.params.aid;
 
-	this.dbconn.Action.find({
+	this.dbconn.Action.findOne({
 		where: {id: actionID},
 		include: [{
 			model: this.dbconn.User,

@@ -91,24 +91,19 @@ var DBConn = function(config) {
 			// A setting that an administrator can set that governs if a user
 			// shows up on the site and can log in or not.
 			active: Sequelize.BOOLEAN
-		}, {
-			instanceMethods: {
-				// Get the gravatar hash of the user
-				getGravatar: function() {
-					var md5 = crypto.createHash('md5');
-					return md5.update(this.email.toLowerCase(), 'ascii').digest('hex');
-				},
-				// Set a password on an existing account
-				setPassword: function(password) {
-					var usernameBuffer = Buffer.from(this.username.toLowerCase(), 'ascii');
-					var passwordBuffer = Buffer.from(password, 'ascii');
-
-					var params = srp.params['2048'];
-					this.salt = crypto.randomBytes(4);
-					this.verifier = srp.computeVerifier(params, this.salt, usernameBuffer, passwordBuffer);
-				}
-			}
 		});
+		self.User.prototype.getGravatar = function() {
+			var md5 = crypto.createHash('md5');
+			return md5.update(this.email.toLowerCase(), 'ascii').digest('hex');
+		};
+		self.User.prototype.setPassword = function(password) {
+			var usernameBuffer = Buffer.from(this.username.toLowerCase(), 'ascii');
+			var passwordBuffer = Buffer.from(password, 'ascii');
+
+			var params = srp.params['2048'];
+			this.salt = crypto.randomBytes(4);
+			this.verifier = srp.computeVerifier(params, this.salt, usernameBuffer, passwordBuffer);
+		};
 
 		// Session is used for authentication sessions
 		self.Session = self.db.define('Session', {
@@ -142,17 +137,14 @@ var DBConn = function(config) {
 			ip: Sequelize.BLOB,
 			before: Sequelize.STRING,
 			after: Sequelize.STRING
-		}, {
-			instanceMethods: {
-				getPrettyType: function() {
-					if (this.type in prettyTypes) {
-						return prettyTypes[this.type];
-					} else {
-						return "Unknown action";
-					}
-				}
-			}
 		});
+		self.Action.prototype.getPrettyType = function() {
+			if (this.type in prettyTypes) {
+				return prettyTypes[this.type];
+			} else {
+				return "Unknown action";
+			}
+		};
 
 		self.User.hasMany(self.Action);
 		self.User.hasMany(self.Action, {as: 'Whom', foreignKey: 'WhomId'});
@@ -174,24 +166,21 @@ var DBConn = function(config) {
 			// A setting that a user can set that governs if their authentications
 			// should be publicly visible or not.
 			visible_lastseen: {type: Sequelize.BOOLEAN, defaultValue: true}
-		}, {
-			instanceMethods: {
-				getCountry: function() {
-					if (_.isNull(this.country) || _.isEmpty(this.country)) {
-						return null;
-					} else {
-						return countries.getData(this.country, 'name.common', null);
-					}
-				},
-				getFlag: function() {
-					if (_.isNull(this.country) || _.isEmpty(this.country)) {
-						return null;
-					} else if (countries.getData(this.country)) {
-						return countries.getData(this.country).cca3.toLowerCase();
-					}
-				}
-			}
 		});
+		self.Profile.prototype.getCountry = function() {
+			if (_.isNull(this.country) || _.isEmpty(this.country)) {
+				return null;
+			} else {
+				return countries.getData(this.country, 'name.common', null);
+			}
+		};
+		self.Profile.prototype.getFlag = function() {
+			if (_.isNull(this.country) || _.isEmpty(this.country)) {
+				return null;
+			} else if (countries.getData(this.country)) {
+				return countries.getData(this.country).cca3.toLowerCase();
+			}
+		};
 
 		self.User.hasOne(self.Profile);
 		self.Profile.belongsTo(self.User);
@@ -229,7 +218,7 @@ DBConn.prototype.addUser = function(username, password, email, access) {
 	]).spread(function(user, profile) {
 		return user.setProfile(profile);
 	}).then(function(profile) {
-		return self.User.find({
+		return self.User.findOne({
 			where: {id: profile.UserId},
 			include: [self.Profile]
 		});
@@ -251,7 +240,7 @@ DBConn.prototype.findUser = function(username) {
 DBConn.prototype.verifyUser = function(identity, password) {
 	var passwordBuffer = Buffer.from(password, 'ascii');
 
-	return this.User.find({
+	return this.User.findOne({
 		where: Sequelize.or(
 			{ username: identity.toLowerCase() },
 			{ email: identity.toLowerCase() }
@@ -290,7 +279,7 @@ DBConn.prototype.newSession = function(username) {
 	});
 };
 DBConn.prototype.findSession = function(session, timeout) {
-	return this.Session.find({ where: { session: session }})
+	return Promise.resolve(this.Session.findAll({ where: { session: session }}))
 	.then(function(sess) {
 		if (sess === null) {
 			throw new error.SessionNotFound("Session not found", session);
@@ -315,14 +304,14 @@ DBConn.prototype.findSession = function(session, timeout) {
 	});
 };
 DBConn.prototype.setEphemeral = function(session, ephemeral, secret, callback) {
-	return this.Session.find({
+	return this.Session.findOne({
 		where: ['session = ? AND ephemeral IS NULL AND secret IS NULL', session]
 	}).then(function(sess) {
 		if (sess === null) {
 			throw new Error("Session not found");
 		}
 
-		return sess.updateAttributes({
+		return sess.update({
 			ephemeral: ephemeral,
 			secret: secret
 		});
@@ -331,12 +320,12 @@ DBConn.prototype.setEphemeral = function(session, ephemeral, secret, callback) {
 
 // Either create a new verify token or reuse an existing one.
 DBConn.prototype.newVerify = function(user) {
-	return this.Verify.findOrCreate({
+	return Promise.resolve(this.Verify.findOrCreate({
 		where: {
 			UserId: user.id
 		}
-	}).spread(function(verify, created) {
-		return verify.updateAttributes({
+	})).spread(function(verify, created) {
+		return verify.update({
 			token: uuid.v4()
 		});
 	});
@@ -344,9 +333,9 @@ DBConn.prototype.newVerify = function(user) {
 
 // Find a valid verify token.
 DBConn.prototype.findVerify = function(token) {
-	return this.Verify.find({
+	return Promise.resolve(this.Verify.findOne({
 		where: {token: token}
-	}).then(function(reset) {
+	})).then(function(reset) {
 		if (reset === null) {
 			throw new error.VerifyNotFound("Verify not found");
 		}
@@ -363,12 +352,12 @@ DBConn.prototype.findVerify = function(token) {
 
 // Either create a new reset token or reuse an existing one.
 DBConn.prototype.newReset = function(user) {
-	return this.Reset.findOrCreate({
+	return Promise.resolve(this.Reset.findOrCreate({
 		where: {
 			UserId: user.id
 		}
-	}).spread(function(reset, _) {
-		return reset.updateAttributes({
+	})).spread(function(reset, _) {
+		return reset.update({
 			token: uuid.v4()
 		});
 	});
@@ -376,9 +365,9 @@ DBConn.prototype.newReset = function(user) {
 
 // Find a valid reset token.
 DBConn.prototype.findReset = function(token) {
-	return this.Reset.find({
+	return Promise.resolve(this.Reset.findOne({
 		where: {token: token}
-	}).then(function(reset) {
+	})).then(function(reset) {
 		if (reset === null) {
 			throw new error.ResetNotFound("Reset not found");
 		}
