@@ -452,7 +452,7 @@ WebUsers.prototype.getActions = function(req, res, next) {
 				model: self.dbconn.User,
 				where: {username: username}
 			}],
-			order: 'Action.createdAt DESC'
+			order: [['createdAt', 'DESC']]
 		};
 		return self.dbconn.Action.count(params);
 	}).then(function(count) {
