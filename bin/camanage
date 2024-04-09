@@ -74,7 +74,7 @@ function userpass(user) {
 	}).then(function(config) {
 		return new DBConn(config.get('database'));
 	}).then(function(dbconn) {
-		return dbconn.User.find({
+		return dbconn.User.findOne({
 			where: {username: user.toLowerCase()}
 		});
 	}).then(function(user) {
@@ -103,7 +103,7 @@ function userlevel(user, level) {
 	}).then(function(config) {
 		return new DBConn(config.get('database'));
 	}).then(function(dbconn) {
-		return dbconn.User.find({
+		return dbconn.User.findOne({
 			where: {username: user.toLowerCase()}
 		});
 	}).then(function(user) {
