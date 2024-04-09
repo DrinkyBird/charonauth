@@ -27,7 +27,7 @@ module.exports.levels = levels;
 
 // Determine if a level is valid or not
 module.exports.validLevel = function(level) {
-	return _.contains(levels, level.toUpperCase());
+	return _.includes(levels, level.toUpperCase());
 };
 
 // Determine what levels a user can set a target to
@@ -40,7 +40,7 @@ module.exports.validLevelSet = function(userAccess, targetAccess) {
 		levels.push('UNVERIFIED');
 	}
 
-	if (_.contains(['OWNER', 'MASTER'], userAccess)) {
+	if (_.includes(['OWNER', 'MASTER'], userAccess)) {
 		// Owners and Masters can hand out Operator privileges.
 		levels.unshift('OP');
 	}
@@ -66,10 +66,10 @@ function defaultAccess(user, target) {
 		return true;
 		case 'MASTER':
 		// Masters can do anything to operators, but not other masters or owners.
-		return !_.contains(['OWNER', 'MASTER'], target.access);
+		return !_.includes(['OWNER', 'MASTER'], target.access);
 		case 'OP':
 		// Operators can do anything to any non-operator user.
-		return !_.contains(['OWNER', 'MASTER', 'OP'], target.access);
+		return !_.includes(['OWNER', 'MASTER', 'OP'], target.access);
 		default:
 		// Everybody else can do nothing.
 		return false;
